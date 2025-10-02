@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "653686330815",
+    "project_id": "healup-87a04",
+    "storage_bucket": "healup-87a04.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653686330815:android:ff0f06e47b0439833c7d0a",
+        "android_client_info": {
+          "package_name": "com.example.healup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9dnfnJA2-O38E9G6nywytC2xn0Fi1GaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
