@@ -55,7 +55,7 @@ dependencies:
   
   # Additional packages for enhanced functionality
   google_sign_in: ^6.1.6
-  firebase_messaging: ^14.7.10
+  firebase_messaging: ^16.0.3
   flutter_local_notifications: ^17.2.3
   permission_handler: ^11.1.0
   shared_preferences: ^2.2.2
