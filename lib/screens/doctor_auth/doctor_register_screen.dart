@@ -845,7 +845,7 @@ class _DoctorRegisterScreenState extends State<DoctorRegisterScreen>
                           const SizedBox(width: 8),
                           Text(
                             'Previous',
-                            style: GoogleFonts.lato(
+                            style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.grey[700],

@@ -174,8 +174,7 @@ class AuthService {
       final user = _auth.currentUser;
       if (user == null) throw Exception('No user signed in');
 
-      await user.updateEmail(newEmail);
-      await user.sendEmailVerification();
+      await user.verifyBeforeUpdateEmail(newEmail);
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
