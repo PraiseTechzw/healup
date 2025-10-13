@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:healup/screens/signIn.dart';
 import 'package:healup/services/auth_service.dart';
@@ -265,38 +264,7 @@ class _RegisterState extends State<Register> {
               width: MediaQuery.of(context).size.width,
               child: Divider(thickness: 1.5),
             ),
-            Container(
-              padding: EdgeInsets.only(top: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.red[700],
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: IconButton(
-                      icon: Icon(FontAwesomeIcons.google, color: Colors.white),
-                      onPressed: _signInWithGoogle,
-                    ),
-                  ),
-                  SizedBox(width: 30),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue[900],
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        FontAwesomeIcons.facebook,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            
             Container(
               child: Padding(
                 padding: const EdgeInsets.only(top: 5.0),
@@ -429,35 +397,7 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  void _signInWithGoogle() async {
-    try {
-      showLoaderDialog(context);
-      final credential = await AuthService.signInWithGoogle();
-
-      if (credential != null) {
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-      } else {
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(child: Text(e.toString())),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 4),
-        ),
-      );
-    }
-  }
+  
 
   void _pushPage(BuildContext context, Widget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));

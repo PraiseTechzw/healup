@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import 'database_service.dart';
@@ -7,7 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Get current user
   static User? get currentUser => _auth.currentUser;
@@ -84,61 +82,10 @@ class AuthService {
     }
   }
 
-  // Sign in with Google
-  static Future<UserCredential?> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-
-      if (userCredential.user != null) {
-        // Check if user exists in Firestore
-        final existingUser = await DatabaseService.getUser(
-          userCredential.user!.uid,
-        );
-
-        if (existingUser == null) {
-          // Create new user profile
-          final userModel = UserModel(
-            id: userCredential.user!.uid,
-            email: userCredential.user!.email ?? '',
-            name: userCredential.user!.displayName ?? '',
-            profileImage: userCredential.user!.photoURL,
-            role: UserRole.patient,
-            isEmailVerified: true,
-            isPhoneVerified: false,
-            allergies: [],
-            medicalConditions: [],
-            medications: [],
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          await DatabaseService.createUser(userModel);
-        } else {
-          // Update last login time
-          await _updateLastLogin(userCredential.user!.uid);
-        }
-      }
-
-      return userCredential;
-    } catch (e) {
-      throw Exception('Failed to sign in with Google: $e');
-    }
-  }
-
   // Sign out
   static Future<void> signOut() async {
     try {
-      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+      await _auth.signOut();
     } catch (e) {
       throw Exception('Failed to sign out: $e');
     }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:healup/screens/register.dart';
 import 'package:healup/services/auth_service.dart';
@@ -183,7 +182,58 @@ class _SignInState extends State<SignIn> {
                 style: ButtonStyle(
                   overlayColor: WidgetStateProperty.all(Colors.transparent),
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  final email = _emailController.text.trim();
+                  if (email.isEmpty || !emailValidate(email)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.white),
+                            SizedBox(width: 8),
+                            Expanded(child: Text('Enter a valid email first.')),
+                          ],
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    return;
+                  }
+                  try {
+                    showLoaderDialog(context);
+                    await AuthService.sendPasswordResetEmail(email);
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.check_circle_outline, color: Colors.white),
+                            SizedBox(width: 8),
+                            Expanded(child: Text('Password reset email sent.')),
+                          ],
+                        ),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  } catch (e) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.white),
+                            SizedBox(width: 8),
+                            Expanded(child: Text(e.toString())),
+                          ],
+                        ),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  }
+                },
                 child: Text(
                   'Forgot Password?',
                   style: GoogleFonts.lato(
@@ -192,38 +242,6 @@ class _SignInState extends State<SignIn> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.only(top: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.red[700],
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: IconButton(
-                      icon: Icon(FontAwesomeIcons.google, color: Colors.white),
-                      onPressed: _signInWithGoogle,
-                    ),
-                  ),
-                  SizedBox(width: 30),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue[900],
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        FontAwesomeIcons.facebook,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
               ),
             ),
             Padding(
@@ -330,35 +348,7 @@ class _SignInState extends State<SignIn> {
     }
   }
 
-  void _signInWithGoogle() async {
-    try {
-      showLoaderDialog(context);
-      final credential = await AuthService.signInWithGoogle();
-
-      if (credential != null) {
-        Navigator.of(
-          context,
-        ).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-      } else {
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(child: Text(e.toString())),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 4),
-        ),
-      );
-    }
-  }
+  
 
   void _pushPage(BuildContext context, Widget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
