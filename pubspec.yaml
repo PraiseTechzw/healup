@@ -67,6 +67,7 @@ dependencies:
   connectivity_plus: ^5.0.2
   device_info_plus: ^9.1.1
   package_info_plus: ^4.2.0
+  fluttertoast: ^9.0.0
 
 dev_dependencies:
   flutter_test:

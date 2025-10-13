@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import 'database_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -175,6 +176,9 @@ class AuthService {
       if (user == null) throw Exception('No user signed in');
 
       await user.verifyBeforeUpdateEmail(newEmail);
+      Fluttertoast.showToast(
+        msg: 'Verification email sent. Please check your inbox.',
+      );
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
