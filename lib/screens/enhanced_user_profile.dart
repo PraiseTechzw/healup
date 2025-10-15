@@ -173,7 +173,11 @@ class _EnhancedUserProfileState extends State<EnhancedUserProfile> {
                   radius: 60,
                   backgroundColor: Colors.grey[200],
                   backgroundImage: userModel.profileImage != null
-                      ? CachedNetworkImageProvider(userModel.profileImage!)
+                      ? (userModel.profileImage!.startsWith('assets/')
+                            ? AssetImage(userModel.profileImage!)
+                            : CachedNetworkImageProvider(
+                                userModel.profileImage!,
+                              ))
                       : null,
                   child: userModel.profileImage == null
                       ? Icon(Icons.person, size: 60, color: Colors.grey[400])

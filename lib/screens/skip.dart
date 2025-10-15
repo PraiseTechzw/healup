@@ -377,39 +377,12 @@ class _SkipState extends State<Skip> {
               ),
             ),
           ),
-          done: Container(
-            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.indigo[500]!, Colors.indigo[700]!],
-              ),
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.indigo.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Get Started',
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 8),
-                Icon(
-                  FontAwesomeIcons.arrowRight,
-                  size: 16,
-                  color: Colors.white,
-                ),
-              ],
+          done: Text(
+            'Get Started',
+            style: GoogleFonts.lato(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.indigo[700],
             ),
           ),
           dotsDecorator: DotsDecorator(

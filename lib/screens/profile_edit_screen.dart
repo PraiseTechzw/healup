@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:healup/models/user_model.dart';
@@ -34,6 +33,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _emergencyContactPhoneController = TextEditingController();
 
   File? _selectedImage;
+  String? _selectedAvatarAsset;
   bool _isLoading = false;
   DateTime? _selectedBirthDate;
   Gender? _selectedGender;
@@ -176,13 +176,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 backgroundColor: Colors.grey[200],
                 backgroundImage: _selectedImage != null
                     ? FileImage(_selectedImage!)
-                    : (widget.userModel.profileImage != null
-                          ? CachedNetworkImageProvider(
-                              widget.userModel.profileImage!,
-                            )
-                          : null),
+                    : (_selectedAvatarAsset != null
+                          ? AssetImage(_selectedAvatarAsset!)
+                          : (widget.userModel.profileImage != null
+                                    ? (widget.userModel.profileImage!
+                                              .startsWith('assets/')
+                                          ? AssetImage(
+                                              widget.userModel.profileImage!,
+                                            )
+                                          : CachedNetworkImageProvider(
+                                              widget.userModel.profileImage!,
+                                            ))
+                                    : null)
+                                as ImageProvider<Object>?),
                 child:
                     _selectedImage == null &&
+                        _selectedAvatarAsset == null &&
                         widget.userModel.profileImage == null
                     ? Icon(Icons.person, size: 60, color: Colors.grey[400])
                     : null,
@@ -198,7 +207,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ),
                   child: IconButton(
                     icon: Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                    onPressed: _pickImage,
+                    onPressed: _openAvatarPicker,
                   ),
                 ),
               ),
@@ -209,19 +218,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton.icon(
-                onPressed: _pickImage,
-                icon: Icon(Icons.photo_library, size: 18),
-                label: Text('Gallery'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo[100],
-                  foregroundColor: Colors.indigo,
-                  elevation: 0,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: _takePicture,
-                icon: Icon(Icons.camera_alt, size: 18),
-                label: Text('Camera'),
+                onPressed: _openAvatarPicker,
+                icon: Icon(Icons.person, size: 18),
+                label: Text('Choose Avatar'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.indigo[100],
                   foregroundColor: Colors.indigo,
@@ -229,6 +228,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 ),
               ),
               if (_selectedImage != null ||
+                  _selectedAvatarAsset != null ||
                   widget.userModel.profileImage != null)
                 ElevatedButton.icon(
                   onPressed: _removeImage,
@@ -549,40 +549,76 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Future<void> _pickImage() async {
-    try {
-      final pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      ErrorService.showErrorSnackBar(context, 'Failed to pick image: $e');
-    }
-  }
-
-  Future<void> _takePicture() async {
-    try {
-      final pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.camera,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _selectedImage = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      ErrorService.showErrorSnackBar(context, 'Failed to take picture: $e');
-    }
-  }
+  // Removed image picking from gallery/camera in favor of predefined avatars
 
   void _removeImage() {
     setState(() {
       _selectedImage = null;
+      _selectedAvatarAsset = null;
     });
+  }
+
+  void _openAvatarPicker() {
+    final List<String> avatarAssets = [
+      'assets/person.jpg',
+      'assets/doc.png',
+      'assets/vector-doc.jpg',
+      'assets/vector-doc2.jpg',
+      'assets/19835.jpg',
+      'assets/19834.jpg',
+      'assets/image-medical.jpg',
+      'assets/image-medical-2.jpg',
+    ];
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(16),
+            height: 360,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Choose an Avatar',
+                  style: GoogleFonts.lato(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 12),
+                Expanded(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                    ),
+                    itemCount: avatarAssets.length,
+                    itemBuilder: (context, index) {
+                      final asset = avatarAssets[index];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedAvatarAsset = asset;
+                            _selectedImage = null;
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: CircleAvatar(backgroundImage: AssetImage(asset)),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _selectBirthDate() async {
@@ -612,8 +648,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     });
 
     try {
-      // TODO: Upload image to Firebase Storage if _selectedImage is not null
-      // For now, we'll just update the user data without image upload
+      final String? newProfileImage =
+          _selectedAvatarAsset ?? widget.userModel.profileImage;
 
       final updatedUser = widget.userModel.copyWith(
         name: _nameController.text,
@@ -626,6 +662,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         bloodType: _selectedBloodType,
         emergencyContactName: _emergencyContactNameController.text,
         emergencyContactPhone: _emergencyContactPhoneController.text,
+        profileImage: newProfileImage,
         updatedAt: DateTime.now(),
       );
 
