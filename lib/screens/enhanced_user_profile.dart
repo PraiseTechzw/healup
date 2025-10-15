@@ -470,10 +470,7 @@ class _EnhancedUserProfileState extends State<EnhancedUserProfile> {
               title: 'Help & Support',
               subtitle: 'Get help and contact support',
               onTap: () {
-                // TODO: Implement help screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Help & Support coming soon!')),
-                );
+                Navigator.pushNamed(context, '/help');
               },
               color: Colors.orange,
             ),

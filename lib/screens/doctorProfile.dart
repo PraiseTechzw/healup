@@ -22,6 +22,22 @@ class _DoctorProfileState extends State<DoctorProfile> {
     }
   }
 
+  Future<void> _openUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
+  }
+
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 22),
+      child: Text(
+        text,
+        style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 18),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,7 +142,19 @@ class _DoctorProfileState extends State<DoctorProfile> {
                               padding: EdgeInsets.only(left: 22, right: 22),
                               alignment: Alignment.center,
                               child: Text(
-                                document['specification'],
+                                (() {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final spec = data['specialization'];
+                                  if (spec is String && spec.isNotEmpty) {
+                                    return spec;
+                                  }
+                                  final specs = data['specializations'];
+                                  if (specs is List && specs.isNotEmpty) {
+                                    return specs.join(', ');
+                                  }
+                                  return '';
+                                })(),
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.lato(
                                   fontSize: 14,
@@ -181,6 +209,29 @@ class _DoctorProfileState extends State<DoctorProfile> {
                                 ],
                               ),
                             ),
+                            Container(
+                              height: MediaQuery.of(context).size.height / 12,
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              child: Row(
+                                children: [
+                                  SizedBox(width: 15),
+                                  Icon(Icons.email_outlined),
+                                  SizedBox(width: 11),
+                                  TextButton(
+                                    onPressed: () => _openUrl(
+                                      "mailto:" + (document['email'] ?? ''),
+                                    ),
+                                    child: Text(
+                                      (document['email'] ?? '').toString(),
+                                      style: GoogleFonts.lato(
+                                        fontSize: 16,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             SizedBox(height: 0),
                             Container(
                               margin: EdgeInsets.symmetric(horizontal: 10),
@@ -217,6 +268,535 @@ class _DoctorProfileState extends State<DoctorProfile> {
                                     style: GoogleFonts.lato(fontSize: 17),
                                   ),
                                 ],
+                              ),
+                            ),
+                            SizedBox(height: 24),
+                            _sectionTitle('Languages'),
+                            SizedBox(height: 8),
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final langs = (data['languages'] is List)
+                                      ? List<String>.from(data['languages'])
+                                      : <String>[];
+                                  if (langs.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: langs
+                                        .map(
+                                          (l) => Chip(
+                                            label: Text(l),
+                                            backgroundColor: Colors.indigo
+                                                .withOpacity(0.08),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Experience & Education'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final experience = data['experience'];
+                                  final education = data['education'] ?? '';
+                                  final graduationYear = data['graduationYear'];
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (experience != null)
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.badge_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              '${experience} years experience',
+                                              style: GoogleFonts.lato(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      if (education is String &&
+                                          education.isNotEmpty) ...[
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.school_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                education,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      if (graduationYear != null) ...[
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_today_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              'Graduated $graduationYear',
+                                              style: GoogleFonts.lato(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Clinic'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final clinicName = data['clinicName'] ?? '';
+                                  final clinicAddress =
+                                      data['clinicAddress'] ?? '';
+                                  final clinicPhone = data['clinicPhone'] ?? '';
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (clinicName.toString().isNotEmpty)
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.local_hospital_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                clinicName,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      if (clinicAddress
+                                          .toString()
+                                          .isNotEmpty) ...[
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.place_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                clinicAddress,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      if (clinicPhone
+                                          .toString()
+                                          .isNotEmpty) ...[
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.phone_outlined,
+                                              size: 18,
+                                              color: Colors.indigo,
+                                            ),
+                                            SizedBox(width: 8),
+                                            TextButton(
+                                              onPressed: () => _launchCaller(
+                                                'tel:$clinicPhone',
+                                              ),
+                                              child: Text(
+                                                clinicPhone,
+                                                style: GoogleFonts.lato(
+                                                  fontSize: 15,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Specializations'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final specs =
+                                      (data['specializations'] is List)
+                                      ? List<String>.from(
+                                          data['specializations'],
+                                        )
+                                      : <String>[];
+                                  final single = data['specialization'];
+                                  final items = specs.isNotEmpty
+                                      ? specs
+                                      : (single is String && single.isNotEmpty
+                                            ? [single]
+                                            : <String>[]);
+                                  if (items.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: items
+                                        .map(
+                                          (s) => Chip(
+                                            label: Text(s),
+                                            backgroundColor: Colors.indigo
+                                                .withOpacity(0.08),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Consultation Fees'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final feesRaw =
+                                      (data['consultationFees'] ?? {}) as Map;
+                                  if (feesRaw.isEmpty) {
+                                    final fee = data['consultationFee'];
+                                    if (fee != null) {
+                                      return Text(
+                                        'Standard: \'$fee\'',
+                                        style: GoogleFonts.lato(fontSize: 15),
+                                      );
+                                    }
+                                    return Text('-', style: GoogleFonts.lato());
+                                  }
+                                  final entries = feesRaw.entries.toList();
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: entries
+                                        .map<Widget>(
+                                          (e) => Padding(
+                                            padding: EdgeInsets.only(bottom: 6),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.payments_outlined,
+                                                  size: 18,
+                                                  color: Colors.indigo,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  '${e.key}: ${e.value}',
+                                                  style: GoogleFonts.lato(
+                                                    fontSize: 15,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Services'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final services = (data['services'] is List)
+                                      ? List<String>.from(data['services'])
+                                      : <String>[];
+                                  if (services.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  return Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: services
+                                        .map(
+                                          (s) => Chip(
+                                            label: Text(s),
+                                            backgroundColor: Colors.indigo
+                                                .withOpacity(0.08),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Certifications'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final certs = (data['certifications'] is List)
+                                      ? List<String>.from(
+                                          data['certifications'],
+                                        )
+                                      : <String>[];
+                                  if (certs.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: certs
+                                        .map(
+                                          (c) => Padding(
+                                            padding: EdgeInsets.only(bottom: 6),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Icon(
+                                                  Icons.verified_outlined,
+                                                  size: 18,
+                                                  color: Colors.indigo,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    c,
+                                                    style: GoogleFonts.lato(
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('About'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final bio =
+                                      (data['bio'] ?? data['description'] ?? '')
+                                          .toString();
+                                  if (bio.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  return Text(
+                                    bio,
+                                    style: GoogleFonts.lato(fontSize: 15),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Status'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final isVerified =
+                                      (data['isVerified'] ?? false) == true;
+                                  final available =
+                                      (data['isAvailable'] ?? true) == true;
+                                  final workingDays =
+                                      (data['workingDays'] is List)
+                                      ? List<String>.from(data['workingDays'])
+                                      : <String>[];
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            isVerified
+                                                ? Icons.verified
+                                                : Icons.verified_outlined,
+                                            color: isVerified
+                                                ? Colors.green
+                                                : Colors.grey,
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            isVerified
+                                                ? 'Verified'
+                                                : 'Not verified',
+                                            style: GoogleFonts.lato(
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            available
+                                                ? Icons.check_circle_outline
+                                                : Icons.cancel_outlined,
+                                            color: available
+                                                ? Colors.green
+                                                : Colors.red,
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            available
+                                                ? 'Available'
+                                                : 'Unavailable',
+                                            style: GoogleFonts.lato(
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (workingDays.isNotEmpty) ...[
+                                        SizedBox(height: 8),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: workingDays
+                                              .map(
+                                                (d) => Chip(
+                                                  label: Text(d),
+                                                  backgroundColor: Colors.indigo
+                                                      .withOpacity(0.08),
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
+                                      ],
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            _sectionTitle('Social'),
+                            SizedBox(height: 8),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 22),
+                              child: Builder(
+                                builder: (_) {
+                                  final data =
+                                      document.data() as Map<String, dynamic>;
+                                  final social = (data['socialMedia'] is Map)
+                                      ? Map<String, dynamic>.from(
+                                          data['socialMedia'],
+                                        )
+                                      : <String, dynamic>{};
+                                  if (social.isEmpty)
+                                    return Text('-', style: GoogleFonts.lato());
+                                  final entries = social.entries.toList();
+                                  return Column(
+                                    children: entries
+                                        .map(
+                                          (e) => ListTile(
+                                            dense: true,
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: Icon(
+                                              Icons.link,
+                                              color: Colors.indigo,
+                                            ),
+                                            title: Text(
+                                              e.key,
+                                              style: GoogleFonts.lato(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            subtitle: Text(
+                                              e.value.toString(),
+                                              style: GoogleFonts.lato(
+                                                fontSize: 13,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                            onTap: () =>
+                                                _openUrl(e.value.toString()),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
                               ),
                             ),
                             SizedBox(height: 50),

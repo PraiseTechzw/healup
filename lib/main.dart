@@ -18,10 +18,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:healup/firebase_options.dart';
+import 'package:flutter/foundation.dart';
+import 'services/seed_service.dart';
+import 'package:healup/screens/help_support_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  if (kDebugMode) {
+    // Seed doctors for Zimbabwe environment when empty
+    await SeedService.seedZimbabweDoctors();
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -53,6 +61,7 @@ class MyApp extends StatelessWidget {
         '/MyAppointments': (context) => MyAppointments(),
         '/DoctorProfile': (context) => const DoctorProfile(doctor: ''),
         '/notifications': (context) => NotificationList(),
+        '/help': (context) => const HelpSupportScreen(),
         '/medical-info': (context) => MedicalInfoScreen(
           userModel: UserModel(
             id: '',
